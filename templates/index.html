@@ -6,19 +6,15 @@
   <style>
     body {
       font-family: 'Roboto', sans-serif;
-      background: #e8eaf6; /* начальный фон */
+      background: #f0f4f8;
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
       margin: 0;
       color: #333;
-      transition: background-color 0.5s ease; /* плавное изменение фона */
-    }
-
-    /* Фон при наведении мыши */
-    body:hover {
-      background: #d0e7f7; /* светло-голубой оттенок */
+      overflow: hidden;
+      position: relative;
     }
 
     .container {
@@ -26,16 +22,18 @@
       padding: 30px;
       border-radius: 12px;
       box-shadow: 0 6px 12px rgba(0,0,0,0.1);
-      width: 600px;
+      width: 580px; /* уменьшил немного */
       max-width: 90%;
-      text-align: center; /* Центрируем текст */
+      text-align: center;
+      z-index: 1;
+      box-sizing: border-box;
     }
 
     h1 {
       font-size: 24px;
       margin-bottom: 20px;
       font-weight: bold;
-      color: #2563eb;
+      color: #2F80ED;
     }
 
     textarea {
@@ -43,24 +41,24 @@
       min-height: 240px;
       font-family: 'Courier New', monospace;
       font-size: 14px;
-      padding: 16px;
+      padding: 14px;
       margin-bottom: 20px;
       border: 1px solid #ccc;
       border-radius: 8px;
       resize: vertical;
       background: #fafafa;
       transition: border-color 0.3s, box-shadow 0.3s;
-      box-sizing: border-box;
+      box-sizing: border-box; /* фикс чтобы не вылазило */
       outline: none;
     }
 
     textarea:focus {
-      border-color: #2563eb;
-      box-shadow: 0 0 8px rgba(37, 99, 235, 0.2);
+      border-color: #2F80ED;
+      box-shadow: 0 0 8px rgba(47, 128, 237, 0.2);
     }
 
     button {
-      background: #2563eb;
+      background: #2F80ED;
       color: white;
       border: none;
       padding: 12px 18px;
@@ -71,16 +69,68 @@
     }
 
     button:hover {
-      background: #1e4ed8;
+      background: #56CCF2;
       transform: scale(1.05);
     }
 
     button:active {
       transform: scale(1);
     }
+
+    .background-shapes {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .circle {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(47, 128, 237, 0.2);
+      animation: moveCircles 10s infinite;
+    }
+
+    .circle.small {
+      width: 100px;
+      height: 100px;
+      top: 10%;
+      left: 20%;
+    }
+
+    .circle.medium {
+      width: 200px;
+      height: 200px;
+      top: 50%;
+      left: 40%;
+      animation-duration: 12s;
+    }
+
+    .circle.large {
+      width: 300px;
+      height: 300px;
+      top: 70%;
+      left: 70%;
+      animation-duration: 15s;
+    }
+
+    @keyframes moveCircles {
+      0% { transform: translate(0, 0); }
+      50% { transform: translate(100px, 100px); }
+      100% { transform: translate(0, 0); }
+    }
   </style>
 </head>
 <body>
+  <div class="background-shapes">
+    <div class="circle small"></div>
+    <div class="circle medium"></div>
+    <div class="circle large"></div>
+  </div>
+
   <div class="container">
     <h1>📂 Project Generator</h1>
     <form id="form">
@@ -88,38 +138,5 @@
       <button type="submit">Сгенерировать ZIP</button>
     </form>
   </div>
-
-  <script>
-    const form = document.getElementById("form");
-    form.onsubmit = async (e) => {
-      e.preventDefault();
-      const data = new FormData(form);
-      const res = await fetch("/generate", { method: "POST", body: data });
-      if (!res.ok) {
-        alert("Ошибка: " + res.statusText);
-        return;
-      }
-      const blob = await res.blob();
-
-      if (window.showSaveFilePicker) {
-        try {
-          const handle = await window.showSaveFilePicker({
-            suggestedName: "project.zip",
-            types: [{ description: "ZIP Archive", accept: {"application/zip": [".zip"]} }]
-          });
-          const writable = await handle.createWritable();
-          await writable.write(blob);
-          await writable.close();
-        } catch (err) {
-          console.log("Сохранение отменено");
-        }
-      } else {
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
-        link.download = "project.zip";
-        link.click();
-      }
-    };
-  </script>
 </body>
 </html>
